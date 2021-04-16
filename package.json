@@ -1,0 +1,56 @@
+{
+  "name": "tuffrabit-device-manager",
+  "version": "1.0.0",
+  "description": "tuffrabit device manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "keywords": [],
+  "author": "Robbie Boucher",
+  "license": "GNU General Public License v3.0",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "electron": "^11.2.2",
+    "electron-rebuild": "^2.3.4"
+  },
+  "dependencies": {
+    "@yesbotics/simple-serial-protocol-node": "^2.2.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "knockout": "^3.5.1",
+    "serialport": "^9.0.6"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "tuffrabit-device-manager"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  }
+}

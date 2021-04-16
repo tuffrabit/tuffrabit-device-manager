@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>tuffrabit device manager</title>
+    <!--<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />-->
+	<link rel="stylesheet" href="w3.css">
+	<link rel="stylesheet" href="main.css">
+	<script src="serial.js"></script>
+	<script src="charcodes.js"></script>
+    <script src="index-view.js"></script>
+</head>
+<body>
+	<div class="showHidden" data-bind="click: enableShowHidden"></div>
+	<div class="controlsContainer">
+		<button data-bind="text: refreshSerialText, click: loadSerialPorts, enable: refreshSerialButtonEnabled"></button>
+		<select name="seriallist" id="seriallist" data-bind="enable: serialPortsEnabled, options: serialPorts,
+					   optionsText: 'name',
+					   optionsValue: 'path',
+					   value: selectedDevice,
+					   optionsCaption: 'Choose a device...'">
+		</select>
+		<button data-bind="text: connectText, click: connect, enable: connectButtonEnabled"></button>
+		<button data-bind="text: disconnectText, click: disconnect, enable: disconnectButtonEnabled"></button>
+		<button data-bind="text: saveText, click: saveData, enable: saveButtonEnabled"></button>
+		<button data-bind="text: initText, click: initDevice, enable: initButtonEnabled, visible: showHiddenItems"></button>
+	</div>
+	<div class="contentContainer" data-bind="visible: contentVisible">
+		<div class="topContainer">
+			<label for="activeprofile">Active Profile:</label>
+			<select name="activeprofile" id="activeprofile" onchange="activeProfileChange(event);" data-bind="options: profiles,
+							   optionsText: 'name',
+							   optionsValue: 'code',
+							   value: activeProfile">
+			</select>
+		</div>
+		<div id="profileValueModal" class="w3-modal">
+			<div class="w3-modal-content">
+				<div class="w3-container">
+					<select name="inputlist" id="inputlist"></select>
+					<button onclick="setProfileInput()">Set</button>
+					<button onclick="document.getElementById('profileValueModal').style.display='none'">Cancel</button>
+				</div>
+			</div>
+		</div>
+		<div class="w3-bar w3-black">
+			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'profile1tab')">Profile 1</button>
+			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'profile2tab')">Profile 2</button>
+			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'profile3tab')">Profile 3</button>
+			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'advancedtab')">Advanced</button>
+		</div>
+		<div id="profile1tab" class="profiletab">
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1a">K1</label>
+					<input id="profile1a" class="profilevalue" type="text" data-bind="value: profile1a" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1b">K2</label>
+					<input id="profile1b" class="profilevalue" type="text" data-bind="value: profile1b" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1c">K3</label>
+					<input id="profile1c" class="profilevalue" type="text" data-bind="value: profile1c" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1d">K4</label>
+					<input id="profile1d" class="profilevalue" type="text" data-bind="value: profile1d" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1e">K5</label>
+					<input id="profile1e" class="profilevalue" type="text" data-bind="value: profile1e" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1f">K6</label>
+					<input id="profile1f" class="profilevalue" type="text" data-bind="value: profile1f" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1g">K7</label>
+					<input id="profile1g" class="profilevalue" type="text" data-bind="value: profile1g" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1h">K8</label>
+					<input id="profile1h" class="profilevalue" type="text" data-bind="value: profile1h" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1i">K9</label>
+					<input id="profile1i" class="profilevalue" type="text" data-bind="value: profile1i" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1j">K10</label>
+					<input id="profile1j" class="profilevalue" type="text" data-bind="value: profile1j" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1k">K11</label>
+					<input id="profile1k" class="profilevalue" type="text" data-bind="value: profile1k" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1l">K12</label>
+					<input id="profile1l" class="profilevalue" type="text" data-bind="value: profile1l" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1m">K13</label>
+					<input id="profile1m" class="profilevalue" type="text" data-bind="value: profile1m" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1n">K14</label>
+					<input id="profile1n" class="profilevalue" type="text" data-bind="value: profile1n" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1o">K15</label>
+					<input id="profile1o" class="profilevalue" type="text" data-bind="value: profile1o" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1p">K16</label>
+					<input id="profile1p" class="profilevalue" type="text" data-bind="value: profile1p" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1q">K17</label>
+					<input id="profile1q" class="profilevalue" type="text" data-bind="value: profile1q" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1r">K18</label>
+					<input id="profile1r" class="profilevalue" type="text" data-bind="value: profile1r" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1s">K19</label>
+					<input id="profile1s" class="profilevalue" type="text" data-bind="value: profile1s" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1t">K20</label>
+					<input id="profile1t" class="profilevalue" type="text" data-bind="value: profile1t" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1StickButton">Stick Button</label>
+					<input id="profile1StickButton" class="profilevalue" type="text" data-bind="value: profile1StickButton" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1ThumbButton">Thumb Button</label>
+					<input id="profile1ThumbButton" class="profilevalue" type="text" data-bind="value: profile1ThumbButton" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span>
+					<label for="profile1KeyboardModeUp">Keyboard Mode Up</label>
+					<input id="profile1KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1KeyboardModeDown">Keyboard Mode Down</label>
+					<input id="profile1KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeDown" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1KeyboardModeLeft">Keyboard Mode Left</label>
+					<input id="profile1KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1KeyboardModeRight">Keyboard Mode Right</label>
+					<input id="profile1KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeRight" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile1DpadUp">DPAD Up</label>
+					<input id="profile1DpadUp" class="profilevalue" type="text" data-bind="value: profile1DpadUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1DpadDown">DPAD Down</label>
+					<input id="profile1DpadDown" class="profilevalue" type="text" data-bind="value: profile1DpadDown" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile1DpadLeft">DPAD Left</label>
+					<input id="profile1DpadLeft" class="profilevalue" type="text" data-bind="value: profile1DpadLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1DpadRight">DPAD Right</label>
+					<input id="profile1DpadRight" class="profilevalue" type="text" data-bind="value: profile1DpadRight" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile1Red">Red</label>
+					<input id="profile1Red" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile1Red" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1Green">Green</label>
+					<input id="profile1Green" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile1Green" />
+				</span>
+				<span class="profileinput">
+					<label for="profile1Blue">Blue</label>
+					<input id="profile1Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile1Blue" />
+				</span>
+			</span>
+		</div>
+
+		<div id="profile2tab" class="profiletab">
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2a">K1</label>
+					<input id="profile2a" class="profilevalue" type="text" data-bind="value: profile2a" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2b">K2</label>
+					<input id="profile2b" class="profilevalue" type="text" data-bind="value: profile2b" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2c">K3</label>
+					<input id="profile2c" class="profilevalue" type="text" data-bind="value: profile2c" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2d">K4</label>
+					<input id="profile2d" class="profilevalue" type="text" data-bind="value: profile2d" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2e">K5</label>
+					<input id="profile2e" class="profilevalue" type="text" data-bind="value: profile2e" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2f">K6</label>
+					<input id="profile2f" class="profilevalue" type="text" data-bind="value: profile2f" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2g">K7</label>
+					<input id="profile2g" class="profilevalue" type="text" data-bind="value: profile2g" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2h">K8</label>
+					<input id="profile2h" class="profilevalue" type="text" data-bind="value: profile2h" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2i">K9</label>
+					<input id="profile2i" class="profilevalue" type="text" data-bind="value: profile2i" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2j">K10</label>
+					<input id="profile2j" class="profilevalue" type="text" data-bind="value: profile2j" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2k">K11</label>
+					<input id="profile2k" class="profilevalue" type="text" data-bind="value: profile2k" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2l">K12</label>
+					<input id="profile2l" class="profilevalue" type="text" data-bind="value: profile2l" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2m">K13</label>
+					<input id="profile2m" class="profilevalue" type="text" data-bind="value: profile2m" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2n">K14</label>
+					<input id="profile2n" class="profilevalue" type="text" data-bind="value: profile2n" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2o">K15</label>
+					<input id="profile2o" class="profilevalue" type="text" data-bind="value: profile2o" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2p">K16</label>
+					<input id="profile2p" class="profilevalue" type="text" data-bind="value: profile2p" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2q">K17</label>
+					<input id="profile2q" class="profilevalue" type="text" data-bind="value: profile2q" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2r">K18</label>
+					<input id="profile2r" class="profilevalue" type="text" data-bind="value: profile2r" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2s">K19</label>
+					<input id="profile2s" class="profilevalue" type="text" data-bind="value: profile2s" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2t">K20</label>
+					<input id="profile2t" class="profilevalue" type="text" data-bind="value: profile2t" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2StickButton">Stick Button</label>
+					<input id="profile2StickButton" class="profilevalue" type="text" data-bind="value: profile2StickButton" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2ThumbButton">Thumb Button</label>
+					<input id="profile2ThumbButton" class="profilevalue" type="text" data-bind="value: profile2ThumbButton" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span>
+					<label for="profile2KeyboardModeUp">Keyboard Mode Up</label>
+					<input id="profile2KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2KeyboardModeDown">Keyboard Mode Down</label>
+					<input id="profile2KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeDown" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2KeyboardModeLeft">Keyboard Mode Left</label>
+					<input id="profile2KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2KeyboardModeRight">Keyboard Mode Right</label>
+					<input id="profile2KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeRight" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile2DpadUp">DPAD Up</label>
+					<input id="profile2DpadUp" class="profilevalue" type="text" data-bind="value: profile2DpadUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2DpadDown">DPAD Down</label>
+					<input id="profile2DpadDown" class="profilevalue" type="text" data-bind="value: profile2DpadDown" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile2DpadLeft">DPAD Left</label>
+					<input id="profile2DpadLeft" class="profilevalue" type="text" data-bind="value: profile2DpadLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2DpadRight">DPAD Right</label>
+					<input id="profile2DpadRight" class="profilevalue" type="text" data-bind="value: profile2DpadRight" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile2Red">Red</label>
+					<input id="profile2Red" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile2Red" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2Green">Green</label>
+					<input id="profile2Green" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile2Green" />
+				</span>
+				<span class="profileinput">
+					<label for="profile2Blue">Blue</label>
+					<input id="profile2Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile2Blue" />
+				</span>
+			</span>
+		</div>
+
+		<div id="profile3tab" class="profiletab">
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3a">K1</label>
+					<input id="profile3a" class="profilevalue" type="text" data-bind="value: profile3a" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3b">K2</label>
+					<input id="profile3b" class="profilevalue" type="text" data-bind="value: profile3b" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3c">K3</label>
+					<input id="profile3c" class="profilevalue" type="text" data-bind="value: profile3c" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3d">K4</label>
+					<input id="profile3d" class="profilevalue" type="text" data-bind="value: profile3d" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3e">K5</label>
+					<input id="profile3e" class="profilevalue" type="text" data-bind="value: profile3e" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3f">K6</label>
+					<input id="profile3f" class="profilevalue" type="text" data-bind="value: profile3f" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3g">K7</label>
+					<input id="profile3g" class="profilevalue" type="text" data-bind="value: profile3g" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3h">K8</label>
+					<input id="profile3h" class="profilevalue" type="text" data-bind="value: profile3h" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3i">K9</label>
+					<input id="profile3i" class="profilevalue" type="text" data-bind="value: profile3i" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3j">K10</label>
+					<input id="profile3j" class="profilevalue" type="text" data-bind="value: profile3j" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3k">K11</label>
+					<input id="profile3k" class="profilevalue" type="text" data-bind="value: profile3k" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3l">K12</label>
+					<input id="profile3l" class="profilevalue" type="text" data-bind="value: profile3l" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3m">K13</label>
+					<input id="profile3m" class="profilevalue" type="text" data-bind="value: profile3m" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3n">K14</label>
+					<input id="profile3n" class="profilevalue" type="text" data-bind="value: profile3n" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3o">K15</label>
+					<input id="profile3o" class="profilevalue" type="text" data-bind="value: profile3o" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3p">K16</label>
+					<input id="profile3p" class="profilevalue" type="text" data-bind="value: profile3p" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3q">K17</label>
+					<input id="profile3q" class="profilevalue" type="text" data-bind="value: profile3q" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3r">K18</label>
+					<input id="profile3r" class="profilevalue" type="text" data-bind="value: profile3r" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3s">K19</label>
+					<input id="profile3s" class="profilevalue" type="text" data-bind="value: profile3s" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3t">K20</label>
+					<input id="profile3t" class="profilevalue" type="text" data-bind="value: profile3t" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3StickButton">Stick Button</label>
+					<input id="profile3StickButton" class="profilevalue" type="text" data-bind="value: profile3StickButton" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3ThumbButton">Thumb Button</label>
+					<input id="profile3ThumbButton" class="profilevalue" type="text" data-bind="value: profile3ThumbButton" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span>
+					<label for="profile3KeyboardModeUp">Keyboard Mode Up</label>
+					<input id="profile3KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3KeyboardModeDown">Keyboard Mode Down</label>
+					<input id="profile3KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeDown" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3KeyboardModeLeft">Keyboard Mode Left</label>
+					<input id="profile3KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3KeyboardModeRight">Keyboard Mode Right</label>
+					<input id="profile3KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeRight" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile3DpadUp">DPAD Up</label>
+					<input id="profile3DpadUp" class="profilevalue" type="text" data-bind="value: profile3DpadUp" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3DpadDown">DPAD Down</label>
+					<input id="profile3DpadDown" class="profilevalue" type="text" data-bind="value: profile3DpadDown" />
+				</span>
+			</span>
+			<span class="profileinputrow" data-bind="visible: isProdUnit">
+				<span class="profileinput">
+					<label for="profile3DpadLeft">DPAD Left</label>
+					<input id="profile3DpadLeft" class="profilevalue" type="text" data-bind="value: profile3DpadLeft" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3DpadRight">DPAD Right</label>
+					<input id="profile3DpadRight" class="profilevalue" type="text" data-bind="value: profile3DpadRight" />
+				</span>
+			</span>
+			<span class="profileinputrow">
+				<span class="profileinput">
+					<label for="profile3Red">Red</label>
+					<input id="profile3Red" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile3Red" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3Green">Green</label>
+					<input id="profile3Green" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile3Green" />
+				</span>
+				<span class="profileinput">
+					<label for="profile3Blue">Blue</label>
+					<input id="profile3Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile3Blue" />
+				</span>
+			</span>
+		</div>
+		<div id="advancedtab" class="profiletab">
+			<div class="advancedTabContent">
+				<label for="lowerXBoundary">Lower X Boundary</label>
+				<input id="lowerXBoundary" class="boundaryValue" oninput="boundaryValueChange(event, 0, 'x');" type="number" min="0" max="1023" step="1" data-bind="value: lowerXBoundary" />
+				<br />
+				<label for="upperXBoundary">Upper X Boundary</label>
+				<input id="upperXBoundary" class="boundaryValue" oninput="boundaryValueChange(event, 1, 'x');" type="number" min="0" max="1023" step="1" data-bind="value: upperXBoundary" />
+				<br />
+				<label for="lowerYBoundary">Lower Y Boundary</label>
+				<input id="lowerYBoundary" class="boundaryValue" oninput="boundaryValueChange(event, 0, 'y');" type="number" min="0" max="1023" step="1" data-bind="value: lowerYBoundary" />
+				<br />
+				<label for="upperYBoundary">Upper Y Boundary</label>
+				<input id="upperYBoundary" class="boundaryValue" oninput="boundaryValueChange(event, 1, 'y');" type="number" min="0" max="1023" step="1" data-bind="value: upperYBoundary" />
+				<br />
+				<label for="keyboardModeXOffset">Keyboard Mode X Offset</label>
+				<input id="keyboardModeXOffset" class="keyboardModeOffsetValue" oninput="keyboardModeOffsetValueChange(event, 'x');" type="number" min="0" max="255" step="1" data-bind="value: keyboardModeXOffset" />
+				<br />
+				<label for="keyboardModeYOffset">Keyboard Mode Y Offset</label>
+				<input id="keyboardModeYOffset" class="keyboardModeOffsetValue" oninput="keyboardModeOffsetValueChange(event, 'y');" type="number" min="0" max="255" step="1" data-bind="value: keyboardModeYOffset" />
+			</div>
+		</div>
+	</div>
+</body>
+</html>
