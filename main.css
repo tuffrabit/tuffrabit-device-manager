@@ -2,7 +2,7 @@ body {
 	background: white;
 }
 
-label, input, select, button {
+label, input, select, button, span {
 	font-size: 11px;
 }
 
@@ -14,7 +14,7 @@ input, select {
 	
 }
 
-.topContainer, .controlsContainer {
+.topContainer, .controlsContainer, .profileActionsContainer {
 	padding-left: 7px;
 	padding-right: 7px;
 	margin-top: 7px;
@@ -43,7 +43,7 @@ input, select {
 }
 
 .profilevalue, .profilergbvalue {
-	width: 175px;
+	width: 110px;
 }
 
 .advancedTabContent {

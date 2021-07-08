@@ -378,6 +378,20 @@ function getBindingFromCode(code) {
 	return binding;
 }
 
+function getBindingFromValue(value) {
+	let binding = null;
+	let i;
+	
+	for (i = 0; i < codeBindings.length; i++) {
+		if (codeBindings[i].value === value) {
+			binding = codeBindings[i];
+			break;
+		}
+	}
+	
+	return binding;
+}
+
 function charToByte(charValue) {
 	let byteValue = null;
 	

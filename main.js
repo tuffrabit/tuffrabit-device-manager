@@ -6,7 +6,7 @@ function createWindow() {
   const win = new BrowserWindow({
 	resizable: false,
     width: 760,
-    height: 620,
+    height: 460,
     webPreferences: {
       nodeIntegration: true
     }
@@ -18,6 +18,8 @@ function createWindow() {
   if (showDevTools) {
 	  win.webContents.openDevTools();
   }
+  //win.setMenuBarVisibility(true);
+  //win.webContents.openDevTools();
 }
 
 if (app.commandLine.hasSwitch('show-dev-tools') &&

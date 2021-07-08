@@ -116,5 +116,9 @@ function handleSerialSet(data) {
 			let serialsetkeyboardmodeoffset = new CustomEvent('serialsetkeyboardmodeoffset', { detail: data });
 			window.dispatchEvent(serialsetkeyboardmodeoffset);
 			break;
+		case 'D': // set is keyboard mode
+			let serialsetiskeyboardmodeactive = new CustomEvent('serialsetiskeyboardmodeactive', { detail: data });
+			window.dispatchEvent(serialsetiskeyboardmodeactive);
+			break;
 	}
 }

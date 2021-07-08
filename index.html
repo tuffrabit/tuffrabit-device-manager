@@ -6,6 +6,7 @@
     <!--<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />-->
 	<link rel="stylesheet" href="w3.css">
 	<link rel="stylesheet" href="main.css">
+	<script src="profilestorage.js"></script>
 	<script src="serial.js"></script>
 	<script src="charcodes.js"></script>
     <script src="index-view.js"></script>
@@ -24,15 +25,23 @@
 		<button data-bind="text: disconnectText, click: disconnect, enable: disconnectButtonEnabled"></button>
 		<button data-bind="text: saveText, click: saveData, enable: saveButtonEnabled"></button>
 		<button data-bind="text: initText, click: initDevice, enable: initButtonEnabled, visible: showHiddenItems"></button>
+		<span>Version 1.1</span>
 	</div>
 	<div class="contentContainer" data-bind="visible: contentVisible">
+	<!--<div class="contentContainer">-->
 		<div class="topContainer">
-			<label for="activeprofile">Active Profile:</label>
-			<select name="activeprofile" id="activeprofile" onchange="activeProfileChange(event);" data-bind="options: profiles,
-							   optionsText: 'name',
-							   optionsValue: 'code',
-							   value: activeProfile">
-			</select>
+			<div>
+				<label for="activeprofile">Active Profile:</label>
+				<select name="activeprofile" id="activeprofile" onchange="activeProfileChange(event);" data-bind="options: profiles,
+								   optionsText: 'name',
+								   optionsValue: 'code',
+								   value: activeProfile">
+				</select>
+			</div>
+			<div style="display:flex;align-items:center;">
+				<label for="keyboardmodeactive" style="margin-right:7px;">KB Mode Active?</label>
+				<input type="checkbox" id="keyboardmodeactive" data-bind="checked: keyboardModeActive, event: { change: keyboardModeActiveChanged }" />
+			</div>
 		</div>
 		<div id="profileValueModal" class="w3-modal">
 			<div class="w3-modal-content">
@@ -49,6 +58,16 @@
 			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'profile3tab')">Profile 3</button>
 			<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'advancedtab')">Advanced</button>
 		</div>
+		<div id="profileActionsContainer" class="profileActionsContainer">
+			<button data-bind="event: { click: copyFromProfileClick }">Copy From</button>
+			<select name="copyfromprofile" id="copyfromprofile" data-bind="options: copyFromProfiles,
+				optionsText: 'name',
+				optionsValue: 'code',
+				value: selectedCopyFromProfile">
+			</select>
+			<button data-bind="event: { click: saveToProfileClick }">Save To</button>
+			<input id="txtSaveToProfile" type="text" />
+		</div>
 		<div id="profile1tab" class="profiletab">
 			<span class="profileinputrow">
 				<span class="profileinput">
@@ -63,8 +82,6 @@
 					<label for="profile1c">K3</label>
 					<input id="profile1c" class="profilevalue" type="text" data-bind="value: profile1c" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1d">K4</label>
 					<input id="profile1d" class="profilevalue" type="text" data-bind="value: profile1d" />
@@ -73,12 +90,12 @@
 					<label for="profile1e">K5</label>
 					<input id="profile1e" class="profilevalue" type="text" data-bind="value: profile1e" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1f">K6</label>
 					<input id="profile1f" class="profilevalue" type="text" data-bind="value: profile1f" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1g">K7</label>
 					<input id="profile1g" class="profilevalue" type="text" data-bind="value: profile1g" />
@@ -91,12 +108,12 @@
 					<label for="profile1i">K9</label>
 					<input id="profile1i" class="profilevalue" type="text" data-bind="value: profile1i" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1j">K10</label>
 					<input id="profile1j" class="profilevalue" type="text" data-bind="value: profile1j" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1k">K11</label>
 					<input id="profile1k" class="profilevalue" type="text" data-bind="value: profile1k" />
@@ -105,8 +122,6 @@
 					<label for="profile1l">K12</label>
 					<input id="profile1l" class="profilevalue" type="text" data-bind="value: profile1l" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1m">K13</label>
 					<input id="profile1m" class="profilevalue" type="text" data-bind="value: profile1m" />
@@ -133,8 +148,6 @@
 					<label for="profile1r">K18</label>
 					<input id="profile1r" class="profilevalue" type="text" data-bind="value: profile1r" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile1s">K19</label>
 					<input id="profile1s" class="profilevalue" type="text" data-bind="value: profile1s" />
@@ -156,21 +169,19 @@
 			</span>
 			<span class="profileinputrow">
 				<span>
-					<label for="profile1KeyboardModeUp">Keyboard Mode Up</label>
+					<label for="profile1KeyboardModeUp">KB Up</label>
 					<input id="profile1KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeUp" />
 				</span>
 				<span class="profileinput">
-					<label for="profile1KeyboardModeDown">Keyboard Mode Down</label>
+					<label for="profile1KeyboardModeDown">KB Down</label>
 					<input id="profile1KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeDown" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
-					<label for="profile1KeyboardModeLeft">Keyboard Mode Left</label>
+					<label for="profile1KeyboardModeLeft">KB Left</label>
 					<input id="profile1KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeLeft" />
 				</span>
 				<span class="profileinput">
-					<label for="profile1KeyboardModeRight">Keyboard Mode Right</label>
+					<label for="profile1KeyboardModeRight">KB Right</label>
 					<input id="profile1KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile1KeyboardModeRight" />
 				</span>
 			</span>
@@ -183,8 +194,6 @@
 					<label for="profile1DpadDown">DPAD Down</label>
 					<input id="profile1DpadDown" class="profilevalue" type="text" data-bind="value: profile1DpadDown" />
 				</span>
-			</span>
-			<span class="profileinputrow" data-bind="visible: isProdUnit">
 				<span class="profileinput">
 					<label for="profile1DpadLeft">DPAD Left</label>
 					<input id="profile1DpadLeft" class="profilevalue" type="text" data-bind="value: profile1DpadLeft" />
@@ -224,8 +233,6 @@
 					<label for="profile2c">K3</label>
 					<input id="profile2c" class="profilevalue" type="text" data-bind="value: profile2c" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2d">K4</label>
 					<input id="profile2d" class="profilevalue" type="text" data-bind="value: profile2d" />
@@ -234,12 +241,12 @@
 					<label for="profile2e">K5</label>
 					<input id="profile2e" class="profilevalue" type="text" data-bind="value: profile2e" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2f">K6</label>
 					<input id="profile2f" class="profilevalue" type="text" data-bind="value: profile2f" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2g">K7</label>
 					<input id="profile2g" class="profilevalue" type="text" data-bind="value: profile2g" />
@@ -252,12 +259,12 @@
 					<label for="profile2i">K9</label>
 					<input id="profile2i" class="profilevalue" type="text" data-bind="value: profile2i" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2j">K10</label>
 					<input id="profile2j" class="profilevalue" type="text" data-bind="value: profile2j" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2k">K11</label>
 					<input id="profile2k" class="profilevalue" type="text" data-bind="value: profile2k" />
@@ -266,8 +273,6 @@
 					<label for="profile2l">K12</label>
 					<input id="profile2l" class="profilevalue" type="text" data-bind="value: profile2l" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2m">K13</label>
 					<input id="profile2m" class="profilevalue" type="text" data-bind="value: profile2m" />
@@ -294,8 +299,6 @@
 					<label for="profile2r">K18</label>
 					<input id="profile2r" class="profilevalue" type="text" data-bind="value: profile2r" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile2s">K19</label>
 					<input id="profile2s" class="profilevalue" type="text" data-bind="value: profile2s" />
@@ -317,21 +320,19 @@
 			</span>
 			<span class="profileinputrow">
 				<span>
-					<label for="profile2KeyboardModeUp">Keyboard Mode Up</label>
+					<label for="profile2KeyboardModeUp">KB Up</label>
 					<input id="profile2KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeUp" />
 				</span>
 				<span class="profileinput">
-					<label for="profile2KeyboardModeDown">Keyboard Mode Down</label>
+					<label for="profile2KeyboardModeDown">KB Down</label>
 					<input id="profile2KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeDown" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
-					<label for="profile2KeyboardModeLeft">Keyboard Mode Left</label>
+					<label for="profile2KeyboardModeLeft">KB Left</label>
 					<input id="profile2KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeLeft" />
 				</span>
 				<span class="profileinput">
-					<label for="profile2KeyboardModeRight">Keyboard Mode Right</label>
+					<label for="profile2KeyboardModeRight">KB Right</label>
 					<input id="profile2KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile2KeyboardModeRight" />
 				</span>
 			</span>
@@ -344,8 +345,6 @@
 					<label for="profile2DpadDown">DPAD Down</label>
 					<input id="profile2DpadDown" class="profilevalue" type="text" data-bind="value: profile2DpadDown" />
 				</span>
-			</span>
-			<span class="profileinputrow" data-bind="visible: isProdUnit">
 				<span class="profileinput">
 					<label for="profile2DpadLeft">DPAD Left</label>
 					<input id="profile2DpadLeft" class="profilevalue" type="text" data-bind="value: profile2DpadLeft" />
@@ -385,8 +384,6 @@
 					<label for="profile3c">K3</label>
 					<input id="profile3c" class="profilevalue" type="text" data-bind="value: profile3c" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3d">K4</label>
 					<input id="profile3d" class="profilevalue" type="text" data-bind="value: profile3d" />
@@ -395,12 +392,12 @@
 					<label for="profile3e">K5</label>
 					<input id="profile3e" class="profilevalue" type="text" data-bind="value: profile3e" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3f">K6</label>
 					<input id="profile3f" class="profilevalue" type="text" data-bind="value: profile3f" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3g">K7</label>
 					<input id="profile3g" class="profilevalue" type="text" data-bind="value: profile3g" />
@@ -413,12 +410,12 @@
 					<label for="profile3i">K9</label>
 					<input id="profile3i" class="profilevalue" type="text" data-bind="value: profile3i" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3j">K10</label>
 					<input id="profile3j" class="profilevalue" type="text" data-bind="value: profile3j" />
 				</span>
+			</span>
+			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3k">K11</label>
 					<input id="profile3k" class="profilevalue" type="text" data-bind="value: profile3k" />
@@ -427,8 +424,6 @@
 					<label for="profile3l">K12</label>
 					<input id="profile3l" class="profilevalue" type="text" data-bind="value: profile3l" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3m">K13</label>
 					<input id="profile3m" class="profilevalue" type="text" data-bind="value: profile3m" />
@@ -455,8 +450,6 @@
 					<label for="profile3r">K18</label>
 					<input id="profile3r" class="profilevalue" type="text" data-bind="value: profile3r" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
 					<label for="profile3s">K19</label>
 					<input id="profile3s" class="profilevalue" type="text" data-bind="value: profile3s" />
@@ -478,21 +471,19 @@
 			</span>
 			<span class="profileinputrow">
 				<span>
-					<label for="profile3KeyboardModeUp">Keyboard Mode Up</label>
+					<label for="profile3KeyboardModeUp">KB Up</label>
 					<input id="profile3KeyboardModeUp" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeUp" />
 				</span>
 				<span class="profileinput">
-					<label for="profile3KeyboardModeDown">Keyboard Mode Down</label>
+					<label for="profile3KeyboardModeDown">KB Down</label>
 					<input id="profile3KeyboardModeDown" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeDown" />
 				</span>
-			</span>
-			<span class="profileinputrow">
 				<span class="profileinput">
-					<label for="profile3KeyboardModeLeft">Keyboard Mode Left</label>
+					<label for="profile3KeyboardModeLeft">KB Left</label>
 					<input id="profile3KeyboardModeLeft" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeLeft" />
 				</span>
 				<span class="profileinput">
-					<label for="profile3KeyboardModeRight">Keyboard Mode Right</label>
+					<label for="profile3KeyboardModeRight">KB Right</label>
 					<input id="profile3KeyboardModeRight" class="profilevalue" type="text" data-bind="value: profile3KeyboardModeRight" />
 				</span>
 			</span>
@@ -505,8 +496,6 @@
 					<label for="profile3DpadDown">DPAD Down</label>
 					<input id="profile3DpadDown" class="profilevalue" type="text" data-bind="value: profile3DpadDown" />
 				</span>
-			</span>
-			<span class="profileinputrow" data-bind="visible: isProdUnit">
 				<span class="profileinput">
 					<label for="profile3DpadLeft">DPAD Left</label>
 					<input id="profile3DpadLeft" class="profilevalue" type="text" data-bind="value: profile3DpadLeft" />

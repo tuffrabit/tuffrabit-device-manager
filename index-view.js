@@ -1,6 +1,43 @@
 const ko = require('knockout');
 
 var currentProfileInputId;
+var profileStorage = new ProfileStorage();
+
+var profileBindingNames = [
+	'a',
+	'b',
+	'c',
+	'd',
+	'e',
+	'f',
+	'g',
+	'h',
+	'i',
+	'j',
+	'k',
+	'l',
+	'm',
+	'n',
+	'o',
+	'p',
+	'q',
+	'r',
+	's',
+	't',
+	'StickButton',
+	'ThumbButton',
+	'KeyboardModeUp',
+	'KeyboardModeDown',
+	'KeyboardModeLeft',
+	'KeyboardModeRight',
+	'DpadUp',
+	'DpadDown',
+	'DpadLeft',
+	'DpadRight',
+	'Red',
+	'Green',
+	'Blue'
+];
 
 var indexViewModel = {
 	serialPorts: ko.observableArray(),
@@ -19,6 +56,10 @@ var indexViewModel = {
 	showHiddenItems: ko.observable(false),
 	profiles: ko.observableArray([{code: 1, name: 'Profile 1'}, {code: 2, name: 'Profile 2'}, {code: 3, name: 'Profile 3'}]),
 	activeProfile: ko.observable(1),
+	selectedProfileTab: ko.observable(),
+	copyFromProfiles: ko.observableArray([]),
+	selectedCopyFromProfile: ko.observable(),
+	keyboardModeActive: ko.observable(false),
 	lowerXBoundary: ko.observable(),
 	upperXBoundary: ko.observable(),
 	lowerYBoundary: ko.observable(),
@@ -133,6 +174,7 @@ var indexViewModel = {
 		window.addEventListener('serialsetactiveprofile', function (e) { self.serialSetActiveProfile(e); }, false);
 		window.addEventListener('serialsetstickaxisboundary', function (e) { self.serialSetStickAxisBoundary(e); }, false);
 		window.addEventListener('serialsetkeyboardmodeoffset', function (e) { self.serialSetKeyboardModeOffset(e); }, false);
+		window.addEventListener('serialsetiskeyboardmodeactive', function (e) { self.serialSetIsKeyboardModeActive(e); }, false);
 	},
 	loadSerialPorts: function() {
 		let self = this;
@@ -161,7 +203,6 @@ var indexViewModel = {
 	},
 	serialConnected: function() {
 		sendSerialMessage([78, 0]);
-		//setTimeout(function() { disconnectSerial(); }, 1000);
 	},
 	serialTuffpadVerified: function() {
 		this.refreshSerialButtonEnabled(false);
@@ -170,12 +211,13 @@ var indexViewModel = {
 		this.disconnectButtonEnabled(true);
 		this.saveButtonEnabled(true);
 		this.initButtonEnabled(true);
-		sendSerialMessage([71, 65]);
-		sendSerialMessage([71, 66]);
-		sendSerialMessage([71, 67]);
-		sendSerialMessage([71, 80, 1]);
-		sendSerialMessage([71, 80, 2]);
-		sendSerialMessage([71, 80, 3]);
+		sendSerialMessage([71, 65]); // Get current active profile
+		sendSerialMessage([71, 66]); // Get current stick bounds
+		sendSerialMessage([71, 67]); // Get current keyboard mode offsets
+		sendSerialMessage([71, 68]); // Get is keyboard mode active
+		sendSerialMessage([71, 80, 1]); // Get profile 1 values
+		sendSerialMessage([71, 80, 2]); // Get profile 2 values
+		sendSerialMessage([71, 80, 3]); // Get profile 3 values
 	},
 	serialDisconnected: function() {
 		this.serialPortsEnabled(true);
@@ -314,8 +356,127 @@ var indexViewModel = {
 			}
 		}
 	},
+	serialSetIsKeyboardModeActive: function(e) {
+		let isActive = e.detail[2];
+		
+		if (isActive === "1") {
+			isActive = true;
+		} else {
+			isActive = false;
+		}
+		
+		indexViewModel.keyboardModeActive(isActive);
+	},
 	enableShowHidden: function() {
 		this.showHiddenItems(true);
+	},
+	keyboardModeActiveChanged: function(data, e) {
+		if (indexViewModel.keyboardModeActive()) {
+			sendSerialMessage([83, 70, true]); // Set keyboard mode active to false
+		} else {
+			sendSerialMessage([83, 70, false]); // Set keyboard mode active to true
+		}
+	},
+	copyFromProfileClick: function() {
+		let currentProfile = indexViewModel.selectedProfileTab();
+		let copyFromProfile = indexViewModel.selectedCopyFromProfile();
+		let savedProfileBindings = null;
+		
+		if (copyFromProfile != 1 && copyFromProfile != 2 && copyFromProfile != 3) {
+			let savedProfiles = profileStorage.getProfiles();
+			
+			if (savedProfiles !== null && typeof savedProfiles[copyFromProfile] !== 'undefined') {
+				savedProfileBindings = savedProfiles[copyFromProfile];
+			}
+		}
+		
+		profileBindingNames.forEach(function(profileValue) {
+			let copyToName = 'profile' + currentProfile + profileValue;
+			let copyFromValue = null;
+			
+			if (savedProfileBindings === null) {
+				let copyFromName = 'profile' + copyFromProfile + profileValue;
+				
+				copyFromValue = indexViewModel[copyFromName]();
+			} else {
+				copyFromValue = savedProfileBindings[profileStorage.convertInputNameToFriendly(profileValue)];
+			}
+			
+			let binding = getBindingFromValue(copyFromValue);
+			
+			if (binding) {
+				indexViewModel[copyToName](copyFromValue);
+				
+				let key = charToByte(profileValue);
+				
+				if (key) {
+					sendSerialMessage([83, 80, currentProfile, key, binding.code]);
+				}
+			}
+		});
+	},
+	saveToProfileClick: function() {
+		let txtSaveToProfile = document.getElementById('txtSaveToProfile');
+		
+		if (txtSaveToProfile && txtSaveToProfile.value) {
+			if (txtSaveToProfile.value.toLowerCase() !== 'profile 1' &&
+				txtSaveToProfile.value.toLowerCase() !== 'profile 2' &&
+				txtSaveToProfile.value.toLowerCase() !== 'profile 3'
+			) {
+				let currentProfile = indexViewModel.selectedProfileTab();
+				let profile = {};
+				
+				profileBindingNames.forEach(function(profileValue) {
+					let saveFromName = 'profile' + currentProfile + profileValue;
+					let saveFromValue = indexViewModel[saveFromName]();
+					
+					if (saveFromValue === undefined) {
+						saveFromValue = null;
+					}
+					
+					profile[profileValue] = saveFromValue;
+				});
+				
+				profileStorage.saveProfile(txtSaveToProfile.value, profileStorage.convertInputNamesToFriendly(profile));
+				alert("Profile " + name + " saved.");
+				indexViewModel.populateCopyFromProfiles();
+			} else {
+				alert(txtSaveToProfile.value + ' is a reserved profile name.');
+			}
+		} else {
+			alert('You must provide a valid profile name to save.');
+		}
+	},
+	populateCopyFromProfiles: function() {
+		let currentProfileTabNumber = indexViewModel.selectedProfileTab();
+		let savedProfiles = profileStorage.getProfiles();
+		
+		if (currentProfileTabNumber) {
+			let profiles = [];
+			
+			switch (currentProfileTabNumber) {
+				case 1:
+					profiles.push({code: 2, name: 'Profile 2'});
+					profiles.push({code: 3, name: 'Profile 3'});
+					break;
+				case 2:
+					profiles.push({code: 1, name: 'Profile 1'});
+					profiles.push({code: 3, name: 'Profile 3'});
+					break;
+				case 3:
+					profiles.push({code: 1, name: 'Profile 1'});
+					profiles.push({code: 2, name: 'Profile 2'});
+					break;
+			}
+			
+			if (savedProfiles !== null) {
+				for (const key in savedProfiles) {
+					profiles.push({code: key, name: key});
+				}
+			}
+			
+			indexViewModel.copyFromProfiles(profiles);
+		}
 	}
 };
 
@@ -335,6 +496,24 @@ function openTab(evt, tabName) {
 	
 	document.getElementById(tabName).style.display = "block";
 	evt.currentTarget.className += " w3-red";
+	
+	document.getElementById('profileActionsContainer').style.display = 'block';
+	
+	switch (tabName) {
+		case 'profile1tab':
+			indexViewModel.selectedProfileTab(1);
+			break;
+		case 'profile2tab':
+			indexViewModel.selectedProfileTab(2);
+			break;
+		case 'profile3tab':
+			indexViewModel.selectedProfileTab(3);
+			break;
+		default:
+			document.getElementById('profileActionsContainer').style.display = 'none';
+	}
+	
+	indexViewModel.populateCopyFromProfiles();
 }
 
 function bindInputsSelect() {
