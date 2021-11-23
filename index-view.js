@@ -34,6 +34,7 @@ var profileBindingNames = [
 	'DpadDown',
 	'DpadLeft',
 	'DpadRight',
+	'KeyboardModeActive',
 	'Red',
 	'Green',
 	'Blue'
@@ -96,6 +97,7 @@ var indexViewModel = {
 	profile1DpadDown: ko.observable(),
 	profile1DpadLeft: ko.observable(),
 	profile1DpadRight: ko.observable(),
+	profile1KeyboardModeActive: ko.observable(false),
 	profile1Red: ko.observable(),
 	profile1Green: ko.observable(),
 	profile1Blue: ko.observable(),
@@ -129,6 +131,7 @@ var indexViewModel = {
 	profile2DpadDown: ko.observable(),
 	profile2DpadLeft: ko.observable(),
 	profile2DpadRight: ko.observable(),
+	profile2KeyboardModeActive: ko.observable(false),
 	profile2Red: ko.observable(),
 	profile2Green: ko.observable(),
 	profile2Blue: ko.observable(),
@@ -162,6 +165,7 @@ var indexViewModel = {
 	profile3DpadDown: ko.observable(),
 	profile3DpadLeft: ko.observable(),
 	profile3DpadRight: ko.observable(),
+	profile3KeyboardModeActive: ko.observable(false),
 	profile3Red: ko.observable(),
 	profile3Green: ko.observable(),
 	profile3Blue: ko.observable(),
@@ -214,7 +218,7 @@ var indexViewModel = {
 		sendSerialMessage([71, 65]); // Get current active profile
 		sendSerialMessage([71, 66]); // Get current stick bounds
 		sendSerialMessage([71, 67]); // Get current keyboard mode offsets
-		sendSerialMessage([71, 68]); // Get is keyboard mode active
+		//sendSerialMessage([71, 68]); // Get is keyboard mode active
 		sendSerialMessage([71, 80, 1]); // Get profile 1 values
 		sendSerialMessage([71, 80, 2]); // Get profile 2 values
 		sendSerialMessage([71, 80, 3]); // Get profile 3 values
@@ -254,7 +258,7 @@ var indexViewModel = {
 	serialSetProfileKeyValue: function(e) {
 		let profileNumber = e.detail[2];
 		let key = e.detail[3];
-		let value = e.detail.substring(4);
+		let value = e.detail.substring(4).trim();
 		let transformValue = true;
 		
 		if (profileNumber && key && value) {
@@ -301,6 +305,17 @@ var indexViewModel = {
 				case '7':
 					key = 'DpadRight';
 					break;
+				case '8':
+					key = 'KeyboardModeActive';
+					transformValue = false;
+					
+					if (value === "1") {
+						value = true;
+					} else {
+						value = false;
+					}
+					
+					break;
 			}
 			
 			let vmTargetName = 'profile' + profileNumber + key;
@@ -310,7 +325,7 @@ var indexViewModel = {
 				
 				if (transformValue) {
 					value = byteToChar(value);
-				} else {
+				} else if (typeof value != 'boolean') {
 					value = parseInt(value);
 				}
 				
@@ -371,10 +386,14 @@ var indexViewModel = {
 		this.showHiddenItems(true);
 	},
 	keyboardModeActiveChanged: function(data, e) {
-		if (indexViewModel.keyboardModeActive()) {
-			sendSerialMessage([83, 70, true]); // Set keyboard mode active to false
+		let currentProfile = indexViewModel.selectedProfileTab();
+		
+		if (indexViewModel['profile' + currentProfile + 'KeyboardModeActive']()) {
+			//sendSerialMessage([83, 70, true]); // Set keyboard mode active to false
+			sendSerialMessage([83, 80, currentProfile, 123, true]);
 		} else {
-			sendSerialMessage([83, 70, false]); // Set keyboard mode active to true
+			//sendSerialMessage([83, 70, false]); // Set keyboard mode active to true
+			sendSerialMessage([83, 80, currentProfile, 123, false]);
 		}
 	},
 	copyFromProfileClick: function() {
@@ -402,15 +421,20 @@ var indexViewModel = {
 				copyFromValue = savedProfileBindings[profileStorage.convertInputNameToFriendly(profileValue)];
 			}
 			
-			let binding = getBindingFromValue(copyFromValue);
-			
-			if (binding) {
+			if (profileValue === 'KeyboardModeActive' && typeof copyFromValue == 'boolean') {
 				indexViewModel[copyToName](copyFromValue);
+				sendSerialMessage([83, 80, currentProfile, 123, copyFromValue]);
+			} else {
+				let binding = getBindingFromValue(copyFromValue);
 				
-				let key = charToByte(profileValue);
-				
-				if (key) {
-					sendSerialMessage([83, 80, currentProfile, key, binding.code]);
+				if (binding) {
+					indexViewModel[copyToName](copyFromValue);
+					
+					let key = charToByte(profileValue);
+					
+					if (key) {
+						sendSerialMessage([83, 80, currentProfile, key, binding.code]);
+					}
 				}
 			}
 		});

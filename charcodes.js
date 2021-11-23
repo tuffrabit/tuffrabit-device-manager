@@ -319,6 +319,7 @@ var codeBindings = [
 	{code: 120, value: 'x'},
 	{code: 121, value: 'y'},
 	{code: 122, value: 'z'},
+	{code: 123, value: 'KeyboardModeActive'},
 	{code: 128, value: 'L Ctrl'},
 	{code: 129, value: 'L Shift'},
 	{code: 130, value: 'L Alt'},

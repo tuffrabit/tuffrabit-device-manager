@@ -25,7 +25,7 @@
 		<button data-bind="text: disconnectText, click: disconnect, enable: disconnectButtonEnabled"></button>
 		<button data-bind="text: saveText, click: saveData, enable: saveButtonEnabled"></button>
 		<button data-bind="text: initText, click: initDevice, enable: initButtonEnabled, visible: showHiddenItems"></button>
-		<span>Version 1.1</span>
+		<span>Version 1.2</span>
 	</div>
 	<div class="contentContainer" data-bind="visible: contentVisible">
 	<!--<div class="contentContainer">-->
@@ -38,10 +38,10 @@
 								   value: activeProfile">
 				</select>
 			</div>
-			<div style="display:flex;align-items:center;">
+			<!--<div style="display:flex;align-items:center;">
 				<label for="keyboardmodeactive" style="margin-right:7px;">KB Mode Active?</label>
 				<input type="checkbox" id="keyboardmodeactive" data-bind="checked: keyboardModeActive, event: { change: keyboardModeActiveChanged }" />
-			</div>
+			</div>-->
 		</div>
 		<div id="profileValueModal" class="w3-modal">
 			<div class="w3-modal-content">
@@ -217,6 +217,10 @@
 					<input id="profile1Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile1Blue" />
 				</span>
 			</span>
+			<span class="profileinputrow" style="justify-content:center;">
+				<label for="profile1KeyboardModeActive" style="margin-right:7px;">KB Mode Active?</label>
+				<input type="checkbox" id="profile1KeyboardModeActive" data-bind="checked: profile1KeyboardModeActive, event: { change: keyboardModeActiveChanged }" />
+			</span>
 		</div>
 
 		<div id="profile2tab" class="profiletab">
@@ -368,6 +372,10 @@
 					<input id="profile2Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile2Blue" />
 				</span>
 			</span>
+			<span class="profileinputrow" style="justify-content:center;">
+				<label for="profile2KeyboardModeActive" style="margin-right:7px;">KB Mode Active?</label>
+				<input type="checkbox" id="profile2KeyboardModeActive" data-bind="checked: profile2KeyboardModeActive, event: { change: keyboardModeActiveChanged }" />
+			</span>
 		</div>
 
 		<div id="profile3tab" class="profiletab">
@@ -518,6 +526,10 @@
 					<label for="profile3Blue">Blue</label>
 					<input id="profile3Blue" class="profilergbvalue" type="number" min="0" max="255" step="1" data-bind="value: profile3Blue" />
 				</span>
+			</span>
+			<span class="profileinputrow" style="justify-content:center;">
+				<label for="profile3KeyboardModeActive" style="margin-right:7px;">KB Mode Active?</label>
+				<input type="checkbox" id="profile3KeyboardModeActive" data-bind="checked: profile3KeyboardModeActive, event: { change: keyboardModeActiveChanged }" />
 			</span>
 		</div>
 		<div id="advancedtab" class="profiletab">
